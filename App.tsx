@@ -74,21 +74,29 @@ const App: React.FC = () => {
     };
     setTasks([...tasks, tempTask]);
 
+    // Prepare data for Supabase - filter out undefined values
+    const insertData: any = {
+      title: taskData.title,
+      description: taskData.description,
+      status: taskData.status,
+      priority: taskData.priority,
+      assignee_id: taskData.assignee_id,
+      start_date: taskData.start_date,
+      due_date: taskData.due_date,
+      estimated_time: taskData.estimated_time,
+      tags: taskData.tags
+    };
+
+    // Only add project_id if it's defined and not empty
+    if (taskData.project_id && taskData.project_id.trim() !== '') {
+      insertData.project_id = taskData.project_id;
+    }
+
     // Save to Supabase
-    const { data, error } = await supabase.from('tasks').insert([
-      {
-        title: taskData.title,
-        description: taskData.description,
-        status: taskData.status,
-        priority: taskData.priority,
-        assignee_id: taskData.assignee_id,
-        start_date: taskData.start_date,
-        due_date: taskData.due_date,
-        estimated_time: taskData.estimated_time,
-        tags: taskData.tags,
-        project_id: taskData.project_id
-      }
-    ]).select();
+    const { data, error } = await supabase
+      .from('tasks')
+      .insert([insertData])
+      .select();
 
     if (data) {
       // Replace temp task with real one
