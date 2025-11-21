@@ -21,26 +21,48 @@ const App: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [timeEntries, setTimeEntries] = useState(MOCK_TIME_ENTRIES);
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(MOCK_TIME_ENTRIES);
 
-  // Global Modal State
+  // Modal state
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [taskModalStatus, setTaskModalStatus] = useState<TaskStatus>(TaskStatus.TODO);
 
+  // Auth session handling
   useEffect(() => {
+    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch data when session is ready
+  const fetchData = async () => {
+    const { data: tasksData } = await supabase.from('tasks').select('*');
+    const { data: projectsData } = await supabase.from('projects').select('*');
+    const { data: usersData } = await supabase.from('users').select('*');
+    if (tasksData) setTasks(tasksData as Task[]);
+    if (projectsData) setProjects(projectsData as Project[]);
+    if (usersData) setUsers(usersData as User[]);
+    // Ensure at least one project exists
+    if (!projectsData || projectsData.length === 0) {
+      const { data: newProject, error } = await supabase.from('projects').insert([
+        {
+          name: 'Default Project',
+          description: 'Auto-generated default project',
+          status: 'Active',
+          progress: 0,
+        },
+      ]).select();
+      if (newProject) setProjects(newProject as Project[]);
+      if (error) console.error('Error creating default project:', error);
+    }
+  };
 
   useEffect(() => {
     if (session) {
@@ -48,33 +70,10 @@ const App: React.FC = () => {
     }
   }, [session]);
 
-  const fetchData = async () => {
-    const { data: tasksData } = await supabase.from('tasks').select('*');
-    const { data: projectsData } = await supabase.from('projects').select('*');
-    const { data: profilesData } = await supabase.from('profiles').select('*');
-
-    if (tasksData) setTasks(tasksData);
-    if (projectsData) setProjects(projectsData);
-    if (profilesData) setUsers(profilesData);
-  };
-
-  const handleAddTimeEntry = (entry: Omit<TimeEntry, 'id'>) => {
-    const newEntry: TimeEntry = {
-      ...entry,
-      id: Math.random().toString(36).substr(2, 9)
-    };
-    setTimeEntries([...timeEntries, newEntry]);
-  };
-
   const handleAddTask = async (taskData: Omit<Task, 'id'>) => {
-    // Optimistic update
-    const tempTask: Task = {
-      ...taskData,
-      id: Math.random().toString(36).substr(2, 9),
-    };
+    // Optimistic UI update
+    const tempTask: Task = { ...taskData, id: Math.random().toString(36).substr(2, 9) };
     setTasks([...tasks, tempTask]);
-
-    // Prepare data for Supabase - filter out undefined values
     const insertData: any = {
       title: taskData.title,
       description: taskData.description,
@@ -84,28 +83,23 @@ const App: React.FC = () => {
       start_date: taskData.start_date,
       due_date: taskData.due_date,
       estimated_time: taskData.estimated_time,
-      tags: taskData.tags
+      tags: taskData.tags,
     };
-
-    // Only add project_id if it's defined and not empty
     if (taskData.project_id && taskData.project_id.trim() !== '') {
       insertData.project_id = taskData.project_id;
     }
-
-    // Save to Supabase
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([insertData])
-      .select();
-
+    const { data, error } = await supabase.from('tasks').insert([insertData]).select();
     if (data) {
-      // Replace temp task with real one
-      setTasks(prev => prev.map(t => t.id === tempTask.id ? data[0] : t));
+      setTasks(prev => prev.map(t => (t.id === tempTask.id ? data[0] : t)));
     } else if (error) {
       console.error('Error adding task:', error);
-      // Revert optimistic update
       setTasks(prev => prev.filter(t => t.id !== tempTask.id));
     }
+  };
+
+  const handleAddTimeEntry = (entry: Omit<TimeEntry, 'id'>) => {
+    const newEntry: TimeEntry = { ...entry, id: Math.random().toString(36).substr(2, 9) };
+    setTimeEntries([...timeEntries, newEntry]);
   };
 
   const openCreateTaskModal = (status: TaskStatus = TaskStatus.TODO) => {
@@ -171,7 +165,6 @@ const App: React.FC = () => {
                 className="w-full bg-gray-900 border border-gray-700 rounded-full py-1.5 px-4 text-sm text-gray-300 focus:border-primary-600 focus:outline-none transition-colors"
               />
             </div>
-
             {/* Global Add Task Button */}
             <button
               onClick={() => openCreateTaskModal()}
@@ -180,31 +173,22 @@ const App: React.FC = () => {
               <Plus size={16} />
               <span className="hidden sm:inline">New Task</span>
             </button>
-
             <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:bg-gray-700">
               AC
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white transition-colors"
-              title="Logout"
-            >
+            <button onClick={handleLogout} className="text-gray-400 hover:text-white transition-colors" title="Logout">
               <LogOut size={20} />
             </button>
           </div>
         </div>
-
-        <div className="flex-1 overflow-auto">
-          {renderView()}
-        </div>
+        <div className="flex-1 overflow-auto">{renderView()}</div>
       </main>
-
       <CreateTaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
         onSave={handleAddTask}
         users={users}
+        projects={projects}
         initialStatus={taskModalStatus}
       />
     </div>

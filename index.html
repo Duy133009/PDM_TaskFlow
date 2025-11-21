@@ -5,53 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InsightPM Clone</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            gray: {
-              850: '#1f2937',
-              900: '#111827',
-              950: '#030712',
-            },
-            primary: {
-              500: '#06b6d4', // Cyan-500
-              600: '#0891b2',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body {
-      background-color: #030712;
-      color: #f3f4f6;
-    }
-
-    /* Custom scrollbar for dark theme */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #111827;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #374151;
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #4b5563;
-    }
-  </style>
   <script type="importmap">
 {
   "imports": {
@@ -68,6 +22,7 @@
 
 <body>
   <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
 
 </html>
