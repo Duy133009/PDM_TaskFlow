@@ -1,15 +1,17 @@
 import React from 'react';
 import { Task, TaskStatus, Priority, User } from '../types';
-import { Plus, MoreHorizontal, Calendar, Clock } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, Clock, Edit2, Trash2 } from 'lucide-react';
 
 interface KanbanBoardProps {
   tasks: Task[];
   users: User[];
   onAddTask: (task: Omit<Task, 'id'>) => void;
   onOpenCreateTask: (status?: TaskStatus) => void;
+  onEditTask: (task: Task) => void;
+  onDeleteTask: (taskId: string) => void;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCreateTask }) => {
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCreateTask, onEditTask, onDeleteTask }) => {
   const columns = [
     { id: TaskStatus.TODO, title: 'To Do', color: 'border-gray-500' },
     { id: TaskStatus.IN_PROGRESS, title: 'In Progress', color: 'border-cyan-500' },
@@ -99,6 +101,23 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCr
                               <span>{task.estimated_time}h</span>
                             </div>
                           )}
+                          <div className="flex-1"></div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onEditTask(task); }}
+                              className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-blue-400"
+                              title="Edit"
+                            >
+                              <Edit2 size={14} />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
+                              className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-red-400"
+                              title="Delete"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     );

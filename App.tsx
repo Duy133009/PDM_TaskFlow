@@ -26,6 +26,7 @@ const App: React.FC = () => {
   // Modal state
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [taskModalStatus, setTaskModalStatus] = useState<TaskStatus>(TaskStatus.TODO);
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
 
   // Auth session handling
   useEffect(() => {
@@ -64,37 +65,110 @@ const App: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (session) {
+  const handleAddTask = async (taskData: Omit<Task, 'id'>) => {
+    if (editingTask) {
+      // Update existing task
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+          priority: taskData.priority,
+          assignee_id: taskData.assignee_id,
+          start_date: taskData.start_date,
+          due_date: taskData.due_date,
+          estimated_time: taskData.estimated_time,
+          tags: taskData.tags,
+          project_id: taskData.project_id?.trim() || null,
+        })
+        .eq('id', editingTask.id)
+        .select();
+
+      if (data) {
+        setTasks(prev => prev.map(t => (t.id === editingTask.id ? data[0] : t)));
+      } else if (error) {
+        console.error('Error updating task:', error);
+      }
+      setEditingTask(undefined);
+    } else {
+      // Create new task
+      // Optimistic UI update
+      const tempTask: Task = { ...taskData, id: Math.random().toString(36).substr(2, 9) };
+      setTasks([...tasks, tempTask]);
+
+      const insertData: any = {
+        title: taskData.title,
+        description: taskData.description,
+        status: taskData.status,
+        priority: taskData.priority,
+        assignee_id: taskData.assignee_id,
+        start_date: taskData.start_date,
+        due_date: taskData.due_date,
+        estimated_time: taskData.estimated_time,
+        tags: taskData.tags,
+      };
+
+      if (taskData.project_id && taskData.project_id.trim() !== '') {
+        insertData.project_id = taskData.project_id;
+      }
+
+      const { data, error } = await supabase.from('tasks').insert([insertData]).select();
+
+      if (data) {
+        setTasks(prev => prev.map(t => (t.id === tempTask.id ? data[0] : t)));
+      } else if (error) {
+        console.error('Error adding task:', error);
+        setTasks(prev => prev.filter(t => t.id !== tempTask.id));
+      }
+    }
+  };
+
+  const handleUpdateTask = async (task: Task) => {
+    // Optimistic update
+    setTasks(prev => prev.map(t => (t.id === task.id ? task : t)));
+
+    const { error } = await supabase
+      .from('tasks')
+      .update({
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        assignee_id: task.assignee_id,
+        start_date: task.start_date,
+        due_date: task.due_date,
+        estimated_time: task.estimated_time,
+        tags: task.tags,
+        project_id: task.project_id?.trim() || null,
+      })
+      .eq('id', task.id);
+
+    if (error) {
+      console.error('Error updating task:', error);
+      // Revert if error (fetch fresh data)
       fetchData();
     }
-  }, [session]);
+  };
 
-  const handleAddTask = async (taskData: Omit<Task, 'id'>) => {
-    // Optimistic UI update
-    const tempTask: Task = { ...taskData, id: Math.random().toString(36).substr(2, 9) };
-    setTasks([...tasks, tempTask]);
-    const insertData: any = {
-      title: taskData.title,
-      description: taskData.description,
-      status: taskData.status,
-      priority: taskData.priority,
-      assignee_id: taskData.assignee_id,
-      start_date: taskData.start_date,
-      due_date: taskData.due_date,
-      estimated_time: taskData.estimated_time,
-      tags: taskData.tags,
-    };
-    if (taskData.project_id && taskData.project_id.trim() !== '') {
-      insertData.project_id = taskData.project_id;
+  const handleDeleteTask = async (taskId: string) => {
+    // Optimistic update
+    const taskToDelete = tasks.find(t => t.id === taskId);
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+
+    const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+
+    if (error) {
+      console.error('Error deleting task:', error);
+      // Revert if error
+      if (taskToDelete) setTasks(prev => [...prev, taskToDelete]);
     }
-    const { data, error } = await supabase.from('tasks').insert([insertData]).select();
-    if (data) {
-      setTasks(prev => prev.map(t => (t.id === tempTask.id ? data[0] : t)));
-    } else if (error) {
-      console.error('Error adding task:', error);
-      setTasks(prev => prev.filter(t => t.id !== tempTask.id));
-    }
+  };
+
+  const openEditTaskModal = (task: Task) => {
+    setEditingTask(task);
+    setTaskModalStatus(task.status);
+    setIsTaskModalOpen(true);
   };
 
   const handleAddTimeEntry = (entry: Omit<TimeEntry, 'id'>) => {
@@ -103,6 +177,7 @@ const App: React.FC = () => {
   };
 
   const openCreateTaskModal = (status: TaskStatus = TaskStatus.TODO) => {
+    setEditingTask(undefined);
     setTaskModalStatus(status);
     setIsTaskModalOpen(true);
   };
@@ -114,9 +189,21 @@ const App: React.FC = () => {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard tasks={tasks} projects={projects} />;
+        return <Dashboard
+          tasks={tasks}
+          projects={projects}
+          onDeleteTask={handleDeleteTask}
+          onUpdateTask={handleUpdateTask}
+        />;
       case 'kanban':
-        return <KanbanBoard tasks={tasks} users={users} onAddTask={handleAddTask} onOpenCreateTask={openCreateTaskModal} />;
+        return <KanbanBoard
+          tasks={tasks}
+          users={users}
+          onAddTask={handleAddTask}
+          onOpenCreateTask={openCreateTaskModal}
+          onEditTask={openEditTaskModal}
+          onDeleteTask={handleDeleteTask}
+        />;
       case 'gantt':
         return <GanttChart tasks={tasks} users={users} />;
       case 'resources':
@@ -185,11 +272,15 @@ const App: React.FC = () => {
       </main>
       <CreateTaskModal
         isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setEditingTask(undefined);
+        }}
         onSave={handleAddTask}
         users={users}
         projects={projects}
         initialStatus={taskModalStatus}
+        taskToEdit={editingTask}
       />
     </div>
   );

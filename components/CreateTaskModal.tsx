@@ -9,6 +9,7 @@ interface CreateTaskModalProps {
   users: User[];
   projects: Project[];
   initialStatus?: TaskStatus;
+  taskToEdit?: Task;
 }
 
 export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
@@ -18,6 +19,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   users,
   projects,
   initialStatus = TaskStatus.TODO,
+  taskToEdit,
 }) => {
   const [newTask, setNewTask] = useState<Partial<Task>>({
     status: initialStatus,
@@ -30,25 +32,41 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   // Reset form when modal opens or initialStatus changes
   useEffect(() => {
     if (isOpen) {
-      setNewTask({
-        title: '',
-        description: '',
-        status: initialStatus,
-        priority: Priority.MEDIUM,
-        assignee_id: users.length > 0 ? users[0].id : undefined,
-        project_id: projects.length > 0 ? projects[0].id : undefined,
-        start_date: new Date().toISOString().split('T')[0],
-        due_date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-        estimated_time: 4,
-        tags: [],
-      });
-      setTagInput('');
+      if (taskToEdit) {
+        setNewTask({
+          title: taskToEdit.title,
+          description: taskToEdit.description,
+          status: taskToEdit.status,
+          priority: taskToEdit.priority,
+          assignee_id: taskToEdit.assignee_id,
+          project_id: taskToEdit.project_id,
+          start_date: taskToEdit.start_date,
+          due_date: taskToEdit.due_date,
+          estimated_time: taskToEdit.estimated_time,
+          tags: taskToEdit.tags,
+        });
+        setTagInput(taskToEdit.tags.join(', '));
+      } else {
+        setNewTask({
+          title: '',
+          description: '',
+          status: initialStatus,
+          priority: Priority.MEDIUM,
+          assignee_id: users.length > 0 ? users[0].id : undefined,
+          project_id: projects.length > 0 ? projects[0].id : undefined,
+          start_date: new Date().toISOString().split('T')[0],
+          due_date: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+          estimated_time: 4,
+          tags: [],
+        });
+        setTagInput('');
+      }
     }
-  }, [isOpen, initialStatus, users, projects]);
+  }, [isOpen, initialStatus, users, projects, taskToEdit]);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTask.title || !newTask.assignee_id) return;
+    if (!newTask.title) return;
 
     const tags = tagInput
       .split(',')
@@ -60,7 +78,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
       description: newTask.description || '',
       status: newTask.status as TaskStatus,
       priority: newTask.priority as Priority,
-      assignee_id: newTask.assignee_id!,
+      assignee_id: newTask.assignee_id,
       project_id: newTask.project_id || undefined,
       start_date: newTask.start_date!,
       due_date: newTask.due_date!,
@@ -76,7 +94,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
       <div className="bg-gray-900 border border-gray-800 rounded-xl w-full max-w-lg shadow-2xl">
         <div className="flex justify-between items-center p-6 border-b border-gray-800">
-          <h3 className="text-xl font-bold text-white">Create New Task</h3>
+          <h3 className="text-xl font-bold text-white">{taskToEdit ? 'Edit Task' : 'Create New Task'}</h3>
           <button onClick={onClose} className="text-gray-500 hover:text-white">
             <X size={20} />
           </button>
@@ -129,13 +147,13 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
           {/* Assignee & Project */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1">Assignee *</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Assignee</label>
               <select
-                required
                 value={newTask.assignee_id || ''}
-                onChange={(e) => setNewTask({ ...newTask, assignee_id: e.target.value })}
+                onChange={(e) => setNewTask({ ...newTask, assignee_id: e.target.value || undefined })}
                 className="w-full bg-gray-950 border border-gray-700 rounded-lg px-3 py-2 text-white focus:border-primary-600 focus:outline-none transition-colors"
               >
+                <option value="">Unassigned</option>
                 {users.length === 0 ? (
                   <option value="" disabled>
                     No users available
@@ -221,10 +239,10 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={!newTask.title || !newTask.assignee_id}
+              disabled={!newTask.title}
               className="px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Task
+              {taskToEdit ? 'Save Changes' : 'Create Task'}
             </button>
           </div>
         </form>

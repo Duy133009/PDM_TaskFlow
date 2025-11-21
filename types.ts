@@ -26,7 +26,7 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   priority: Priority;
-  assignee_id: string;
+  assignee_id?: string;
   start_date: string; // ISO Date
   due_date: string;   // ISO Date
   estimated_time: number; // Hours

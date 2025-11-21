@@ -24,7 +24,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tasks, timeEntries
 
   const totalEstimated = tasks.reduce((sum, t) => sum + t.estimated_time, 0);
   const totalActual = timeEntries.reduce((sum, e) => sum + e.hours, 0);
-  const efficiency = totalEstimated > 0 ? Math.round((totalEstimated / totalActual) * 100) : 0;
+  const efficiency = totalActual > 0 ? Math.round((totalEstimated / totalActual) * 100) : 0;
 
   return (
     <div className="p-8">
