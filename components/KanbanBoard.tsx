@@ -1,6 +1,6 @@
 import React from 'react';
 import { Task, TaskStatus, Priority, User } from '../types';
-import { Plus, MoreHorizontal, Calendar } from 'lucide-react';
+import { Plus, MoreHorizontal, Calendar, Clock } from 'lucide-react';
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -38,7 +38,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCr
           </div>
           <p className="text-gray-400">{tasks.length} tasks across all stages</p>
         </div>
-        <button 
+        <button
           onClick={() => onOpenCreateTask(TaskStatus.TODO)}
           className="bg-primary-600 hover:bg-primary-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
         >
@@ -52,8 +52,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCr
           {columns.map(col => {
             const colTasks = tasks.filter(t => t.status === col.id);
             return (
-              <div key={col.id} className="flex-1 flex flex-col min-w-[300px]">
-                <div className={`flex items-center justify-between mb-4 border-t-2 ${col.color} pt-4`}>
+              <div key={col.id} className="flex-1 flex flex-col min-w-[300px] bg-gray-900/50 rounded-xl p-4 border border-gray-800">
+                <div className={`flex items-center justify-between mb-4 border-t-2 ${col.color} pt-2`}>
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-gray-200">{col.title}</h3>
                     <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">
@@ -65,55 +65,53 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, users, onOpenCr
                   </button>
                 </div>
 
-                <div className="flex-1 space-y-3 overflow-y-auto pr-2 pb-4">
+                <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                   {colTasks.map(task => {
-                    const assignee = getUser(task.assigneeId);
+                    const assignee = task.assignee_id ? getUser(task.assignee_id) : undefined;
                     return (
-                      <div key={task.id} className="bg-gray-900 p-4 rounded-lg border border-gray-800 hover:border-gray-700 transition-all group cursor-pointer shadow-sm">
-                        <div className="flex justify-between items-start mb-2">
-                          <span className={`text-xs px-2 py-0.5 rounded border ${getPriorityColor(task.priority)}`}>
+                      <div key={task.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors group cursor-pointer shadow-sm">
+                        <div className="flex justify-between items-start mb-3">
+                          <span className={`text-xs px-2 py-1 rounded border ${getPriorityColor(task.priority)}`}>
                             {task.priority}
                           </span>
-                          <button className="text-gray-600 hover:text-gray-400 opacity-0 group-hover:opacity-100">
-                            <MoreHorizontal size={16} />
-                          </button>
-                        </div>
-                        
-                        <h4 className="text-white font-medium mb-3 text-sm leading-snug">{task.title}</h4>
-                        
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {task.tags.map(tag => (
-                            <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-gray-800 text-gray-400 rounded">
-                              {tag}
-                            </span>
-                          ))}
+                          {assignee && (
+                            <img
+                              src={assignee.avatar_url || 'https://via.placeholder.com/32'}
+                              alt={assignee.full_name}
+                              className="w-6 h-6 rounded-full border border-gray-600"
+                              title={assignee.full_name}
+                            />
+                          )}
                         </div>
 
-                        <div className="flex items-center justify-between pt-2 border-t border-gray-800">
-                          {assignee && (
-                            <div className="flex items-center gap-2" title={assignee.name}>
-                              <img src={assignee.avatar} alt={assignee.name} className="w-6 h-6 rounded-full border border-gray-700" />
-                              <span className="text-xs text-gray-500 hidden sm:inline">{assignee.name.split(' ')[0]}</span>
+                        <h4 className="text-gray-200 font-medium mb-2 line-clamp-2">{task.title}</h4>
+
+                        <div className="flex items-center gap-4 text-xs text-gray-500 mt-3">
+                          {task.due_date && (
+                            <div className="flex items-center gap-1">
+                              <Calendar size={12} />
+                              <span>{new Date(task.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                             </div>
                           )}
-                          
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar size={12} />
-                            {new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                          </div>
+                          {task.estimated_time && (
+                            <div className="flex items-center gap-1">
+                              <Clock size={12} />
+                              <span>{task.estimated_time}h</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
                   })}
-                  
-                  <button 
-                    onClick={() => onOpenCreateTask(col.id)}
-                    className="w-full py-2 rounded-lg border border-dashed border-gray-800 text-gray-500 hover:border-gray-700 hover:text-gray-400 hover:bg-gray-900/50 text-sm flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Plus size={16} />
-                    Add card
-                  </button>
                 </div>
+
+                <button
+                  onClick={() => onOpenCreateTask(col.id)}
+                  className="mt-3 w-full py-2 flex items-center justify-center gap-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors text-sm border border-dashed border-gray-700 hover:border-gray-600"
+                >
+                  <Plus size={16} />
+                  Add card
+                </button>
               </div>
             );
           })}

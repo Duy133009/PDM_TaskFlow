@@ -14,10 +14,10 @@ export enum Priority {
 
 export interface User {
   id: string;
-  name: string;
+  full_name: string;
   role: string;
-  avatar: string; // URL
-  dailyCapacityHours: number;
+  avatar_url: string;
+  daily_capacity_hours: number;
 }
 
 export interface Task {
@@ -26,18 +26,19 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   priority: Priority;
-  assigneeId: string;
-  startDate: string; // ISO Date
-  dueDate: string;   // ISO Date
-  estimatedTime: number; // Hours
+  assignee_id: string;
+  start_date: string; // ISO Date
+  due_date: string;   // ISO Date
+  estimated_time: number; // Hours
   tags: string[];
   dependencies?: string[]; // IDs of tasks this task depends on
+  project_id?: string;
 }
 
 export interface TimeEntry {
   id: string;
-  taskId: string;
-  userId: string;
+  task_id: string;
+  user_id: string;
   hours: number;
   date: string; // ISO Date
   description?: string;

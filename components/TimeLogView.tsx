@@ -17,15 +17,15 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTask || !hours) return;
-    
+
     addTimeEntry({
-      taskId: selectedTask,
-      userId: 'u1', // Mocking current user
+      task_id: selectedTask,
+      user_id: 'u1', // Mocking current user
       hours: parseFloat(hours),
       date: date,
       description: desc
     });
-    
+
     // Reset
     setHours('');
     setDesc('');
@@ -49,17 +49,17 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
             <div className="text-xs text-gray-500">This Week</div>
           </div>
         </div>
-         {/* Placeholders for other stats */}
+        {/* Placeholders for other stats */}
       </div>
 
       <form onSubmit={handleSubmit} className="bg-gray-900 p-6 rounded-xl border border-gray-800 mb-8 shadow-lg">
         <h3 className="text-lg font-semibold text-white mb-4">Log Time Entry</h3>
-        
+
         <div className="grid grid-cols-2 gap-6 mb-4">
           <div>
             <label className="block text-xs text-gray-400 mb-1 uppercase font-semibold">Date *</label>
-            <input 
-              type="date" 
+            <input
+              type="date"
               required
               value={date}
               onChange={(e) => setDate(e.target.value)}
@@ -68,9 +68,9 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
           </div>
           <div>
             <label className="block text-xs text-gray-400 mb-1 uppercase font-semibold">Hours *</label>
-            <input 
-              type="number" 
-              min="0.1" 
+            <input
+              type="number"
+              min="0.1"
               step="0.1"
               required
               value={hours}
@@ -83,7 +83,7 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
 
         <div className="mb-4">
           <label className="block text-xs text-gray-400 mb-1 uppercase font-semibold">Task *</label>
-          <select 
+          <select
             value={selectedTask}
             onChange={(e) => setSelectedTask(e.target.value)}
             required
@@ -97,14 +97,14 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
         </div>
 
         <div className="mb-6">
-           <label className="block text-xs text-gray-400 mb-1 uppercase font-semibold">Description (Optional)</label>
-           <textarea 
-             rows={3}
-             value={desc}
-             onChange={(e) => setDesc(e.target.value)}
-             placeholder="Add notes about this time entry..."
-             className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2.5 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all resize-none"
-           />
+          <label className="block text-xs text-gray-400 mb-1 uppercase font-semibold">Description (Optional)</label>
+          <textarea
+            rows={3}
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder="Add notes about this time entry..."
+            className="w-full bg-gray-950 border border-gray-700 rounded-lg p-2.5 text-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all resize-none"
+          />
         </div>
 
         <div className="flex justify-end">
@@ -118,21 +118,21 @@ export const TimeLogView: React.FC<TimeLogViewProps> = ({ tasks, timeEntries, ad
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-300">Recent Entries</h3>
         {timeEntries.slice().reverse().map(entry => {
-           const task = tasks.find(t => t.id === entry.taskId);
-           return (
-             <div key={entry.id} className="bg-gray-900 p-4 rounded-lg border border-gray-800 flex justify-between items-center group hover:border-gray-700 transition-colors">
-               <div>
-                 <div className="flex items-center gap-2 mb-1">
-                   <h4 className="font-medium text-white">{task?.title || 'Unknown Task'}</h4>
-                   <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{entry.hours}h</span>
-                 </div>
-                 <p className="text-xs text-gray-500">{new Date(entry.date).toLocaleDateString()} • {entry.description || 'No description'}</p>
-               </div>
-               <button className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                 <Trash2 size={18} />
-               </button>
-             </div>
-           )
+          const task = tasks.find(t => t.id === entry.task_id);
+          return (
+            <div key={entry.id} className="bg-gray-900 p-4 rounded-lg border border-gray-800 flex justify-between items-center group hover:border-gray-700 transition-colors">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-medium text-white">{task?.title || 'Unknown Task'}</h4>
+                  <span className="bg-gray-800 text-gray-400 text-xs px-2 py-0.5 rounded-full">{entry.hours}h</span>
+                </div>
+                <p className="text-xs text-gray-500">{new Date(entry.date).toLocaleDateString()} • {entry.description || 'No description'}</p>
+              </div>
+              <button className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Trash2 size={18} />
+              </button>
+            </div>
+          )
         })}
       </div>
     </div>
