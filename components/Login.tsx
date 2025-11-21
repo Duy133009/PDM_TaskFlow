@@ -45,7 +45,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 onLoginSuccess();
             }
         } catch (err: any) {
-            setError(err.message || 'Đăng nhập thất bại');
+            setError(err.message || 'Login failed');
         } finally {
             setLoading(false);
         }
@@ -64,10 +64,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
             if (error) throw error;
 
-            setSuccess('Đã gửi email khôi phục mật khẩu! Vui lòng kiểm tra hộp thư.');
+            setSuccess('Password recovery email sent! Please check your inbox.');
             setForgotPasswordEmail('');
         } catch (err: any) {
-            setError(err.message || 'Gửi yêu cầu thất bại');
+            setError(err.message || 'Request failed');
         } finally {
             setLoading(false);
         }
@@ -80,7 +80,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setSuccess(null);
 
         if (registerPassword !== registerConfirmPassword) {
-            setError('Mật khẩu xác nhận không khớp');
+            setError('Passwords do not match');
             setLoading(false);
             return;
         }
@@ -100,11 +100,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             if (error) throw error;
 
             if (data.user) {
-                setSuccess('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận.');
+                setSuccess('Registration successful! Please check your email to confirm.');
                 setIsActive(false);
             }
         } catch (err: any) {
-            setError(err.message || 'Đăng ký thất bại');
+            setError(err.message || 'Registration failed');
         } finally {
             setLoading(false);
         }
@@ -116,7 +116,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 <div className="form-box login">
                     {!showForgotPassword ? (
                         <form onSubmit={handleLogin}>
-                            <h1>Đăng Nhập</h1>
+                            <h1>Login</h1>
                             <div className="input-box">
                                 <input
                                     type="text"
@@ -130,16 +130,14 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                             <div className="input-box">
                                 <input
                                     type="password"
-                                    placeholder="Mật khẩu"
+                                    placeholder="Pass Word"
                                     required
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
                                 />
                                 <i className='bx bxs-lock-alt'></i>
                             </div>
-                            <div className="forgot-link">
-                                <a href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); setError(null); setSuccess(null); }}>Quên mật khẩu?</a>
-                            </div>
+
                             <div className="remember-me">
                                 <label>
                                     <input
@@ -147,18 +145,18 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                         checked={rememberMe}
                                         onChange={(e) => setRememberMe(e.target.checked)}
                                     />
-                                    Ghi nhớ đăng nhập
+                                    Remember me
                                 </label>
                             </div>
                             <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Đang xử lý...' : 'Đăng Nhập'}
+                                {loading ? 'Pleasee Waiting' : 'Login'}
                             </button>
                             {error && <div className="error-message">{error}</div>}
                         </form>
                     ) : (
                         <form onSubmit={handleForgotPassword}>
-                            <h1>Khôi Phục Mật Khẩu</h1>
-                            <p style={{ textAlign: 'center', marginBottom: '20px', color: '#ccc' }}>Nhập email của bạn để nhận liên kết đặt lại mật khẩu.</p>
+                            <h1>Reset Password</h1>
+                            <p style={{ textAlign: 'center', marginBottom: '20px', color: '#ccc' }}>Enter your email to receive a password reset link.</p>
                             <div className="input-box">
                                 <input
                                     type="email"
@@ -170,10 +168,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                                 <i className='bx bxs-envelope'></i>
                             </div>
                             <button type="submit" className="btn btn-primary" disabled={loading}>
-                                {loading ? 'Đang gửi...' : 'Gửi Yêu Cầu'}
+                                {loading ? 'Sending...' : 'Send Request'}
                             </button>
                             <div style={{ textAlign: 'center', marginTop: '15px' }}>
-                                <a href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(false); setError(null); setSuccess(null); }} className="forgot-link">Quay lại Đăng Nhập</a>
+                                <a href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(false); setError(null); setSuccess(null); }} className="forgot-link">Back to Login</a>
                             </div>
                             {error && <div className="error-message">{error}</div>}
                             {success && <div className="success-message" style={{ marginTop: '15px', color: 'green', textAlign: 'center' }}>{success}</div>}
@@ -183,11 +181,11 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
                 <div className="form-box register">
                     <form onSubmit={handleRegister}>
-                        <h1>Đăng Ký</h1>
+                        <h1>Register</h1>
                         <div className="input-box">
                             <input
                                 type="text"
-                                placeholder="Họ và Tên"
+                                placeholder="Full Name"
                                 required
                                 value={registerFullName}
                                 onChange={(e) => setRegisterFullName(e.target.value)}
@@ -197,7 +195,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         <div className="input-box">
                             <input
                                 type="text"
-                                placeholder="Tên đăng nhập"
+                                placeholder="Username"
                                 required
                                 value={registerUsername}
                                 onChange={(e) => setRegisterUsername(e.target.value)}
@@ -217,7 +215,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         <div className="input-box">
                             <input
                                 type="password"
-                                placeholder="Mật khẩu"
+                                placeholder="Password"
                                 required
                                 value={registerPassword}
                                 onChange={(e) => setRegisterPassword(e.target.value)}
@@ -227,7 +225,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                         <div className="input-box">
                             <input
                                 type="password"
-                                placeholder="Xác nhận mật khẩu"
+                                placeholder="Confirm Password"
                                 required
                                 value={registerConfirmPassword}
                                 onChange={(e) => setRegisterConfirmPassword(e.target.value)}
@@ -235,7 +233,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                             <i className='bx bxs-lock-alt'></i>
                         </div>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? 'Đang xử lý...' : 'Đăng Ký'}
+                            {loading ? 'Processing...' : 'Register'}
                         </button>
                         {error && <div className="error-message">{error}</div>}
                         {success && <div className="success-message" style={{ marginTop: '15px', color: 'green', textAlign: 'center' }}>{success}</div>}
@@ -244,15 +242,15 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
 
                 <div className="toggle-box">
                     <div className="toggle-panel toggle-left">
-                        <h1>Chào mừng trở lại!</h1>
-                        <p>Chưa có tài khoản?</p>
-                        <button className="btn register-btn" onClick={() => setIsActive(true)}>Đăng Ký</button>
+                        <h1>Welcome Back!</h1>
+                        <p>Don't have an account?</p>
+                        <button className="btn register-btn" onClick={() => setIsActive(true)}>Register</button>
                     </div>
 
                     <div className="toggle-panel toggle-right">
-                        <h1>Xin chào!</h1>
-                        <p>Đã có tài khoản?</p>
-                        <button className="btn login-btn" onClick={() => setIsActive(false)}>Đăng Nhập</button>
+                        <h1>Hello!</h1>
+                        <p>Already have an account?</p>
+                        <button className="btn login-btn" onClick={() => setIsActive(false)}>Login</button>
                     </div>
                 </div>
             </div>
