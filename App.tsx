@@ -75,6 +75,13 @@ const App: React.FC = () => {
     }
   };
 
+  // Fetch data when user logs in
+  useEffect(() => {
+    if (session) {
+      fetchData();
+    }
+  }, [session]);
+
   const handleAddTask = async (taskData: Omit<Task, 'id'>) => {
     if (editingTask) {
       // Update existing task
