@@ -117,6 +117,8 @@ const App: React.FC = () => {
         due_date: taskData.due_date,
         estimated_time: taskData.estimated_time,
         tags: taskData.tags,
+        // Auto-set completed_at if creating a task with Done status
+        completed_at: taskData.status === 'Done' ? new Date().toISOString() : null,
       };
 
       if (taskData.project_id && taskData.project_id.trim() !== '') {

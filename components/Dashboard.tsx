@@ -129,10 +129,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, projects, onDeleteT
             {sortedActiveTasks.length === 0 ? (
               <p className="text-slate-500 text-center py-4">No active tasks</p>
             ) : (
-              sortedActiveTasks.map(task => (
+              sortedActiveTasks.map(task => {
+                // Check if task is overdue
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dueDate = task.due_date ? new Date(task.due_date) : null;
+                const isOverdue = dueDate && dueDate < today && task.status !== TaskStatus.DONE;
+
+                return (
                 <div key={task.id} className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-slate-600 hover:bg-slate-800 transition-all group">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-slate-100 line-clamp-1">{task.title}</h4>
+                    <h4 className={`font-medium line-clamp-1 ${isOverdue ? 'text-red-500 font-bold' : 'text-slate-100'}`}>{task.title}</h4>
                     <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ml-2 ${task.status === TaskStatus.IN_PROGRESS
                       ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                       : 'bg-slate-700/50 text-slate-300'
@@ -166,7 +173,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, projects, onDeleteT
                     </button>
                   </div>
                 </div>
-              ))
+              )})
             )}
           </div>
         </div>
