@@ -9,13 +9,17 @@ interface AnalyticsViewProps {
 }
 
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tasks, timeEntries }) => {
-  // Group completed tasks by completed_at date
+  // Group completed tasks by date (completed_at or today as fallback)
   const completedByDate: Record<string, number> = {};
+  const today = new Date().toISOString().split('T')[0];
+  
   tasks.forEach(task => {
-    if (task.status === 'Done' && task.completed_at) {
-      // Extract just the date part (YYYY-MM-DD)
-      const date = task.completed_at.split('T')[0];
-      completedByDate[date] = (completedByDate[date] || 0) + 1;
+    if (task.status === 'Done') {
+      // Use completed_at if available, otherwise use today
+      const completionDate = task.completed_at 
+        ? task.completed_at.split('T')[0] 
+        : today;
+      completedByDate[completionDate] = (completedByDate[completionDate] || 0) + 1;
     }
   });
 
@@ -32,13 +36,13 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tasks, timeEntries
   // Calculate meaningful metrics
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.status === 'Done').length;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
   const overdueTasks = tasks.filter(t => {
     if (t.status === 'Done') return false;
     if (!t.due_date) return false;
     const dueDate = new Date(t.due_date);
-    return dueDate < today;
+    return dueDate < todayDate;
   }).length;
   const inProgressTasks = tasks.filter(t => t.status === 'In Progress').length;
 
