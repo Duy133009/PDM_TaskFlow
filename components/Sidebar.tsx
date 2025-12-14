@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, KanbanSquare, GanttChartSquare, Users, BarChart3, Clock, Settings } from 'lucide-react';
+import { LayoutDashboard, KanbanSquare, GanttChartSquare, BarChart3, Clock, Settings } from 'lucide-react';
 
 interface SidebarProps {
   currentView: string;
@@ -11,7 +11,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentView, setCurrentView })
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'kanban', label: 'Kanban Board', icon: KanbanSquare },
     { id: 'gantt', label: 'Gantt Chart', icon: GanttChartSquare },
-    { id: 'resources', label: 'Resource Mgmt', icon: Users },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ];
 

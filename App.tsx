@@ -3,7 +3,6 @@ import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { KanbanBoard } from './components/KanbanBoard';
 import { GanttChart } from './components/GanttChart';
-import { ResourceView } from './components/ResourceView';
 import { AnalyticsView } from './components/AnalyticsView';
 import { TimeLogView } from './components/TimeLogView';
 import { SettingsView } from './components/SettingsView';
@@ -234,8 +233,6 @@ const App: React.FC = () => {
         />;
       case 'gantt':
         return <GanttChart tasks={tasks} users={users} />;
-      case 'resources':
-        return <ResourceView tasks={tasks} users={users} />;
       case 'analytics':
         return <AnalyticsView tasks={tasks} timeEntries={timeEntries} />;
       case 'time':
