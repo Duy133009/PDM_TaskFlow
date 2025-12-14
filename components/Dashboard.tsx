@@ -35,6 +35,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ tasks, projects, onDeleteT
 
   const sortedActiveTasks = [...activeTasksList].sort((a, b) => {
     if (sortByPriority) {
+      // Sort by deadline first (earliest deadline = higher priority)
+      const dateA = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+      const dateB = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+      if (dateA !== dateB) {
+        return dateA - dateB;
+      }
+      // If same deadline, sort by priority
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     }
     return 0;
